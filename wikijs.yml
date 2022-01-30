@@ -39,8 +39,6 @@ services:
       DB_NAME: wiki
       DB_PASS_FILE: /run/secrets/wiki_database_password
     restart: unless-stopped
-    ports:
-      - 7014:3443
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wiki.entrypoints=websecure"

@@ -13,9 +13,6 @@ services:
     expose:
       - 3890 #LDAP
       - 17170 #frontend
-    ports:
-      - 17170:17170
-      - 3890:3890
     volumes:
       # - lldap_data:/data"
       # Alternatively, you can mount a local folder

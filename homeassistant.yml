@@ -13,8 +13,6 @@ services:
     #   - /path/to/device:/path/to/device
     expose:
       - 8123
-    ports:
-      - 8123:8123
     environment:
       - PUID=1000
       - PGID=1000

@@ -13,8 +13,6 @@ services:
       CRON_MIN: "*/20"
     links:
       - freshrss_db:freshrss-db
-    ports:
-      - 7002:80
     volumes:
       - freshrss_client:/var/www/FreshRSS/data
     labels:

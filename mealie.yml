@@ -9,8 +9,6 @@ services:
       - ./backups/mealie:/app/data/backups
     expose:
       - 80
-    ports:
-      - 7001:80
     restart: unless-stopped
     environment:
       # Database Settings

@@ -17,8 +17,6 @@ services:
       N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
     expose:
       - 5678
-    ports:
-      - 7010:5678
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.n8n.entrypoints=websecure"

@@ -33,12 +33,41 @@ authentication_backend:
 access_control:
   default_policy: deny
   rules:
-    - domain: public.abbiewade.com
+    - domain:
+        - tig.abbiewade.com
       policy: bypass
-    # - domain: "*.abbiewade.com"
-    #   policy: one_factor
+
+    - domain:
+        - codeserver.abbiewade.com
+        - gitlab.abbiewade.com
+        - n8n.abbiewade.com
+        - snippetbox.abbiewade.com
+      policy: one_factor
+      subject: groups:dev
+
+    - domain:
+        - homeassistant.abbiewade.com
+        - wiki.abbiewade.com
+        - bridge.abbiewade.com
+      policy: one_factor
+      subject: groups:home
+
+    - domain:
+        - recipes.abbiewade.com
+        - podgrab.abbiewade.com
+      policy: one_factor
+      subject:
+        - groups:family
+        - groups:friends
+        - groups:home
+
+    - domain: ldap.abbiewade.com
+      subject: groups:lldap_admins
+      policy: one_factor
+
     - domain: "*.abbiewade.com"
       policy: one_factor
+      subject: "group:admins"
 
 session:
   name: authelia_session

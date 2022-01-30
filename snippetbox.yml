@@ -8,8 +8,6 @@ services:
       - ./data/snippetbox:/app/data
     expose:
       - 5000
-    ports:
-      - 7005:5000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.snippet_box.rule=Host(`snippets.${LDAP_DOMAIN}`)"

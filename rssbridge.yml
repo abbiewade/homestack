@@ -8,8 +8,6 @@ services:
       - ./config/rss_bridge:/config
     expose:
       - 80
-    ports:
-      - 7006:80
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rss_bridge.rule=Host(`bridge.${LDAP_DOMAIN}`)"

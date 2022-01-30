@@ -34,8 +34,6 @@ services:
       # - AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE=/run/secrets/authelia_smtp_password
     expose:
       - 9091
-    ports:
-      - 7000:9091
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.authelia.rule=Host(`auth.${LDAP_DOMAIN}`)"
