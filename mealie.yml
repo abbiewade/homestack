@@ -1,0 +1,51 @@
+version: "3.7"
+
+services:
+  mealie:
+    container_name: mealie
+    image: hkotel/mealie:latest
+    volumes:
+      - ./data/mealie:/app/data
+      - ./backups/mealie:/app/data/backups
+    expose:
+      - 80
+    ports:
+      - 7001:80
+    restart: unless-stopped
+    environment:
+      # Database Settings
+      DB_ENGINE: postgres # Optional: 'sqlite', 'postgres'
+      POSTGRES_USER: mealie
+      POSTGRES_PASSWORD: mealie
+      POSTGRES_SERVER: mealie_db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: mealie
+
+      # Default Recipe Settings
+      RECIPE_PUBLIC: "true"
+      RECIPE_SHOW_NUTRITION: "false"
+      RECIPE_SHOW_ASSETS: "true"
+      RECIPE_LANDSCAPE_VIEW: "true"
+      RECIPE_DISABLE_COMMENTS: "true"
+      RECIPE_DISABLE_AMOUNT: "false"
+
+      # ldap settings
+      LDAP_AUTH_ENABLED: "True"
+      LDAP_SERVER_URL: $LDAP_SERVER_URL
+      LDAP_BIND_TEMPLATE: $LDAP_BIND_TEMPLATE
+      LDAP_ADMIN_FILTER: $LDAP_ADMIN_FILTER
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mealie.rule=Host(`recipes.${LDAP_DOMAIN}`)"
+      - "traefik.http.routers.mealie.entrypoints=websecure"
+      - "traefik.http.routers.mealie.tls=true"
+      - "traefik.http.routers.mealie.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mealie.middlewares=authelia@docker"
+  mealie_db:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mealie
+      POSTGRES_USER: mealie

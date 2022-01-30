@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  podgrab:
+    image: akhilrex/podgrab
+    container_name: podgrab
+    environment:
+      - CHECK_FREQUENCY=720
+    volumes:
+      - ./data/podgrab/assets:/assets
+      - ./data/podgrab/config:/config
+    expose:
+      - 8080
+    ports:
+      - 7007:8080
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.podgrab.entrypoints=websecure"
+      - "traefik.http.routers.podgrab.tls=true"
+      - "traefik.http.routers.podgrab.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.podgrab.middlewares=authelia@docker"

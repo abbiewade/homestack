@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  secure:
+    image: traefik/whoami
+    container_name: debug_secure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.debug_secure.entrypoints=websecure"
+      - "traefik.http.routers.debug_secure.tls=true"
+      - "traefik.http.routers.debug_secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.debug_secure.middlewares=authelia@docker"
+    expose:
+      - 80
+
+  public:
+    image: traefik/whoami
+    container_name: debug_public
+    expose:
+      - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.debug_public.entrypoints=websecure"
+      - "traefik.http.routers.debug_public.tls=true"
+      - "traefik.http.routers.debug_public.tls.certresolver=letsencrypt"

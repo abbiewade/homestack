@@ -1,0 +1,36 @@
+version: "3.7"
+
+# volumes:
+#   lldap_data:
+
+services:
+  lldap:
+    image: nitnelave/lldap:stable
+    container_name: lldap
+    secrets:
+      - lldap_admin_password
+      - lldap_jwt
+    expose:
+      - 3890 #LDAP
+      - 17170 #frontend
+    ports:
+      - 17170:17170
+      - 3890:3890
+    volumes:
+      # - lldap_data:/data"
+      # Alternatively, you can mount a local folder
+      - "./config/lldap:/data"
+    environment:
+      - LLDAP_USER_PASS_FILE=/run/secrets/lldap_admin_password
+      - LLDAP_JWT_SECRET_FILE=/run/secrets/lldap_jwt
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lldap.rule=Host(`ldap.${LDAP_DOMAIN}`)"
+      - "traefik.http.routers.lldap.entrypoints=websecure"
+      - "traefik.http.routers.lldap.tls=true"
+      - traefik.docker.network=traefik-global-proxy
+      - "traefik.http.routers.lldap.tls.certresolver=letsencrypt"
+      - "traefik.http.services.lldap.loadbalancer.server.port=17170"
+      - "traefik.http.routers.lldap.middlewares=authelia@docker"

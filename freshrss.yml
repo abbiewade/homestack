@@ -1,0 +1,42 @@
+version: "3.7"
+
+volumes:
+  freshrss_data:
+  freshrss_client:
+
+services:
+  rss:
+    container_name: rss
+    image: lscr.io/linuxserver/freshrss
+    restart: unless-stopped
+    environment:
+      CRON_MIN: "*/20"
+    links:
+      - freshrss_db:freshrss-db
+    ports:
+      - 7002:80
+    volumes:
+      - freshrss_client:/var/www/FreshRSS/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.freshrss.entrypoints=websecure"
+      - "traefik.http.routers.freshrss.tls=true"
+      - "traefik.http.routers.freshrss.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.freshrss.middlewares=authelia@docker"
+
+  freshrss_db:
+    container_name: freshrss_db
+    image: ${POSTGRES_IMAGE}
+    restart: unless-stopped
+    secrets:
+      - freshrss_database_name
+      - freshrss_database_user
+      - freshrss_database_password
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/freshrss_database_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/freshrss_database_password
+      POSTGRES_DB_FILE: /run/secrets/freshrss_database_name
+    volumes:
+      - freshrss_data:/var/lib/postgresql/data
+    expose:
+      - 5432

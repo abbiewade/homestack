@@ -1,0 +1,60 @@
+---
+###############################################################
+#                   Authelia configuration                    #
+###############################################################
+
+default_redirection_url: https://public.abbiewade.com
+
+server:
+  host: 0.0.0.0
+  port: 9091
+
+log:
+  level: debug
+  format: json
+
+totp:
+  issuer: authelia.com
+
+authentication_backend:
+  disable_reset_password: false
+  refresh_interval: 1m
+  ldap:
+    implementation: custom
+    url: ldap://lldap:3890
+    base_dn: dc=abbiewade,dc=com
+    username_attribute: uid
+    additional_users_dn: ou=people
+    users_filter: (&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=person))
+    additional_groups_dn: ou=groups
+    groups_filter: (member={dn})
+    user: cn=admin,ou=people,dc=abbiewade,dc=com
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: public.abbiewade.com
+      policy: bypass
+    # - domain: "*.abbiewade.com"
+    #   policy: one_factor
+    - domain: "*.abbiewade.com"
+      policy: one_factor
+
+session:
+  name: authelia_session
+  expiration: 3600 # 1 hour
+  inactivity: 300 # 5 minutes
+  domain: abbiewade.com # Should match whatever your root protected domain is
+
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 300
+
+storage:
+  local:
+    path: /data/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /data/notification.txt

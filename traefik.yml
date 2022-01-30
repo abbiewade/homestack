@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v2.6
+    container_name: traefik
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - ./data/certs:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    env_file:
+      - ./.env
+    command:
+      - --api
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --accesslog.filepath=/usr/local/traefik/logs/access.log
+      - --certificatesresolvers.letsencrypt.acme.email=${CERTS_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      # todo: remove the next line when I am ready
+      - --certificatesresolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --global.checkNewVersion=true
+      - --global.sendAnonymousUsage=false
+      - --log.level=DEBUG
+      - --metrics.prometheus.buckets=0.100000, 0.300000, 1.200000, 5.000000
+      - --providers.docker=true
+      - --providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.compose.service" }}.${LDAP_DOMAIN}`)
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.file=true
+      - --providers.file.directory=/etc/traefik/backends

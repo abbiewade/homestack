@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  codeserver:
+    image: ghcr.io/linuxserver/code-server
+    container_name: codeserver
+    volumes:
+      - ./data/codeserver:/config
+      # - ../homestack:/config/workspace/homestack
+    expose:
+      - 8443
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    secrets:
+      - codeserver_sudo_password
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - SUDO_PASSWORD_FILE=/run/secrets/codeserver_sudo_password
+      - PROXY_DOMAIN=codeserver.${LDAP_DOMAIN}
+      - DEFAULT_WORKSPACE=/config/workspace
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.codeserver.entrypoints=websecure"
+      - "traefik.http.routers.codeserver.tls=true"
+      - "traefik.http.routers.codeserver.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.codeserver.middlewares=authelia@docker"

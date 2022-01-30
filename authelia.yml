@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  authelia_redis:
+    image: ${REDIS_IMAGE}
+    container_name: redis
+    volumes:
+      - ./data/authelia/redis:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - 6379
+    restart: unless-stopped
+
+  authelia:
+    container_name: authelia
+    image: authelia/authelia
+    restart: unless-stopped
+    volumes:
+      - ./config/authelia/configuration.yml:/config/configuration.yml
+      - ./data/authelia/users_database.yml:/data/users_database.yml
+      - ./data/authelia/db.sqlite3:/data/db.sqlite3
+    secrets:
+      - authelia_jwt
+      - authelia_session
+      - authelia_smtp_password
+      - authelia_storage
+      - lldap_admin_password
+    environment:
+      - AUTHELIA_JWT_SECRET_FILE=/run/secrets/authelia_jwt
+      - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/authelia_session
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/run/secrets/authelia_storage
+      - AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE=/run/secrets/lldap_admin_password
+      # - AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE=/run/secrets/authelia_smtp_password
+    expose:
+      - 9091
+    ports:
+      - 7000:9091
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.rule=Host(`auth.${LDAP_DOMAIN}`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.routers.authelia.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.${LDAP_DOMAIN}" # yamllint disable-line rule:line-length
+      - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email" # yamllint disable-line rule:line-length

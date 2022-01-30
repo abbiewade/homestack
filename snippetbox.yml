@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  snippet_box:
+    container_name: snippet_box
+    image: pawelmalak/snippet-box
+    volumes:
+      - ./data/snippetbox:/app/data
+    expose:
+      - 5000
+    ports:
+      - 7005:5000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.snippet_box.rule=Host(`snippets.${LDAP_DOMAIN}`)"
+      - "traefik.http.routers.snippet_box.entrypoints=websecure"
+      - "traefik.http.routers.snippet_box.tls=true"
+      - "traefik.http.routers.snippet_box.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.snippet_box.middlewares=authelia@docker"

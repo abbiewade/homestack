@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: lscr.io/linuxserver/homeassistant
+    restart: unless-stopped
+    network_mode: host # needs to be able to find the different iot devices
+    privileged: true
+    volumes:
+      - ./data/homeassistant/config:/config
+    # devices:
+    #   - /path/to/device:/path/to/device
+    expose:
+      - 8123
+    ports:
+      - 8123:8123
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Sydney
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homeassistant.entrypoints=websecure"
+      - "traefik.http.routers.homeassistant.tls=true"
+      - "traefik.http.routers.homeassistant.tls.certresolver=letsencrypt"
+      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
+      - "traefik.http.routers.homeassistant.middlewares=authelia@docker"
